@@ -1,5 +1,5 @@
 import torch
-import wandb
+# import wandb
 from loguru import logger
 from tqdm import tqdm
 
@@ -41,7 +41,7 @@ class BaseTrainer:
                 detached_loss = loss.item()
                 loss_accum += detached_loss
                 t.set_description(f"Train (loss = {detached_loss:.4f}, smoothed = {loss_accum / (step + 1):.4f})")
-                wandb.log({"train/iter-loss": detached_loss, "train/iter-loss-smoothed": loss_accum / (step + 1)})
+                # wandb.log({"train/iter-loss": detached_loss, "train/iter-loss-smoothed": loss_accum / (step + 1)})
 
         logger.info("Average training loss: {:.4f}".format(loss_accum / (step + 1)))
         return loss_accum / (step + 1)

@@ -19,6 +19,7 @@ from torch_geometric.nn import (
     global_mean_pool,
 )
 
+
 class TransformerGNN(BaseModel):
     @staticmethod
     def get_emb_dim(args):
@@ -30,7 +31,8 @@ class TransformerGNN(BaseModel):
         MaskedOnlyTransformerEncoder.add_args(parser)
         group = parser.add_argument_group("GNNTransformer - Training Config")
         group.add_argument("--pretrained_gnn", type=str, default=None, help="pretrained gnn_node node embedding path")
-        group.add_argument("--freeze_gnn", type=int, default=None, help="Freeze gnn_node weight from epoch `freeze_gnn`")
+        group.add_argument("--freeze_gnn", type=int, default=None,
+                           help="Freeze gnn_node weight from epoch `freeze_gnn`")
         group.add_argument("--graph_input_dim", type=int, default=None)
 
     @staticmethod
@@ -54,7 +56,9 @@ class TransformerGNN(BaseModel):
     def __init__(self, num_tasks, node_encoder, edge_encoder_cls, args):
         super().__init__()
         self.node_encoder = node_encoder
-        self.input2transformer = nn.Linear(args.graph_input_dim, args.d_model) if args.graph_input_dim is not None else None
+        self.d_model = args.d_model
+        self.input2transformer = nn.Linear(args.graph_input_dim,
+                                           args.d_model) if args.graph_input_dim is not None else None
         self.transformer_encoder = TransformerNodeEncoder(args)
         self.masked_transformer_encoder = MaskedOnlyTransformerEncoder(args)
         gnn_emb_dim = args.gnn_emb_dim
@@ -157,7 +161,7 @@ class TransformerGNN(BaseModel):
             ).transpose(0, 1)
         if self.num_encoder_layers > 0:
             transformer_out, _ = self.transformer_encoder(transformer_out, src_padding_mask)  # [s, b, h], [b, s]
-        
+
         h_node = unpad_batch(transformer_out, tmp, num_nodes, mask, max_num_nodes)
         batched_data.x = self.transformer2gnn(h_node)
         h_node = self.gnn_node(batched_data, None)
@@ -187,6 +191,9 @@ class TransformerGNN(BaseModel):
             if module_name in k:
                 new_key = k.split(".")
                 module_index = new_key.index(module_name)
-                new_key = ".".join(new_key[module_index + 1 :])
+                new_key = ".".join(new_key[module_index + 1:])
                 new_state_dict[new_key] = v
         return new_state_dict
+
+    def _get_d_model(self):
+        return self.d_model

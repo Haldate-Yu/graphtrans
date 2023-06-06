@@ -1,5 +1,5 @@
 import torch
-import wandb
+# import wandb
 from tqdm import tqdm
 
 from trainers import register_trainer
@@ -51,7 +51,7 @@ class FlagTrainer(BaseTrainer):
 
                 detached_loss = loss.item()
                 loss_accum += detached_loss
-                wandb.log({"train/iter-loss": detached_loss})
+                # wandb.log({"train/iter-loss": detached_loss})
 
         return loss_accum / (step + 1)
 

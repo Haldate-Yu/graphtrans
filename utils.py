@@ -46,10 +46,10 @@ def results_to_file(args, test_acc, test_std,
 
         os.makedirs('./results/{}'.format(args.dataset))
 
-    filename = "./results/{}/result_seed{}.csv".format(
-        args.dataset, args.seed)
+    filename = "./results/{}/result_batchsize{}_layers{}.csv".format(
+        args.dataset, args.batch_size, args.num_encoder_layers)
 
-    headerList = ["Method", "Batch_Size",
+    headerList = ["Method", "N_Heads", "Batch_Size",
                   "Encoder_Layers", "Hidden_Dims",
                   "Model_Params", "Memory_Usage(MB)",
                   "::::::::",
@@ -69,9 +69,9 @@ def results_to_file(args, test_acc, test_std,
                                 fieldnames=headerList)
             dw.writeheader()
 
-        line = "{}, {}, {}, {}, {}, {}, :::::::::, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}\n".format(
-            args.model_type, args.batch_size,
-            args.num_encoder_layers, args.d_model,
+        line = "{}, {}, {}, {}, {}, {}, {}, :::::::::, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}\n".format(
+            args.model_type, args.nhead, args.batch_size,
+            args.num_encoder_layers, args.model_dim,
             args.total_params, args.memory_usage,
             test_acc, test_std,
             val_acc, val_std,

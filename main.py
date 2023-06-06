@@ -1,23 +1,19 @@
 import os
 import time
-import random
 from datetime import datetime
 
 import configargparse
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 # import wandb
 from loguru import logger
 from ogb.graphproppred import Evaluator, PygGraphPropPredDataset
 from torch.optim.lr_scheduler import CosineAnnealingLR, OneCycleLR, ReduceLROnPlateau
 from torch_geometric.data import DataLoader
-from tqdm import tqdm
 
 import utils
-from data.adj_list import compute_adjacency_list_cached
+from dataset.adj_list import compute_adjacency_list_cached
 from dataset import DATASET_UTILS
 from models import get_model_and_parser
 from trainers import get_trainer_and_parser
@@ -34,7 +30,7 @@ def main():
     parser.add_argument('--configs', required=False, is_config_file=True)
     parser.add_argument('--wandb_run_idx', type=str, default=None)
 
-    parser.add_argument('--data_root', type=str, default='../data')
+    parser.add_argument('--data_root', type=str, default='../../data')
     parser.add_argument('--dataset', type=str, default="ogbg-code",
                         help='dataset name (default: ogbg-code)')
 
@@ -81,10 +77,16 @@ def main():
     group.add_argument('--resume', type=str, default=None)
     group.add_argument('--seed', type=int, default=None)
     group.add_argument('--device', type=int, default=0)
+    group.add_argument('--device_id', type=int, default=0)
 
     # Some Critical Params (memory, params)
     group.add_argument('--total_params', type=int, default=0)
     group.add_argument('--memory_usage', type=int, default=0)
+    group.add_argument('--model_dim', type=int, default=0)
+
+    # extra settings
+    group.add_argument('--d_model', type=int, default=128)
+    group.add_argument('--nheads', type=int, default=4)
     # fmt: on
 
     args, _ = parser.parse_known_args()
@@ -110,7 +112,7 @@ def main():
         run_name = args.wandb_run_idx + "_" + run_name
 
     # wandb.run.name = run_name
-
+    args.device_id = args.device
     device = torch.device('cuda:{}'.format(args.device) if torch.cuda.is_available() else "cpu")
 
     args.device = torch.device('cuda:{}'.format(args.device) if torch.cuda.is_available() else "cpu")
@@ -179,6 +181,8 @@ def main():
         model = model_cls(num_tasks=num_tasks, args=args, node_encoder=node_encoder,
                           edge_encoder_cls=edge_encoder_cls).to(device)
         print("Model Parameters: ", utils.num_trainable_parameters(model))
+        args.total_params = utils.num_trainable_parameters(model)
+        args.model_dim = model._get_d_model()
         # exit(-1)
         # model = nn.DataParallel(model)
 
@@ -229,8 +233,8 @@ def main():
             loss = train(model, device, train_loader, optimizer, args, calc_loss,
                          scheduler if args.scheduler != "plateau" else None)
             # memory usage
-            if epoch == 42:
-                mem = utils.print_gpu_utilization(args.device)
+            if epoch == 1:
+                mem = utils.print_gpu_utilization(args.device_id)
                 args.memory_usage = mem
 
             model.epoch_callback(epoch)

@@ -21,5 +21,6 @@ dim_feedforward: 256
 num_encoder_layers: 4
 scheduler: cosine
 
+# nhead: 4
 transformer_dropout: 0.1
 gnn_dropout: 0.1
