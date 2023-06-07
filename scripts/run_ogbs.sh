@@ -141,4 +141,4 @@ wait" C-m
 tmux send-keys "
 python ../main.py --configs $config --num_workers 8 --device 2 --nhead 16 --d_model 256 --gnn_emb_dim 256 --num_encoder_layers 12 &
 wait" C-m
-tmux send-keys "tmux kill-session -t GraphTrans_TUs" C-m
+tmux send-keys "tmux kill-session -t GraphTrans_OGBG" C-m
