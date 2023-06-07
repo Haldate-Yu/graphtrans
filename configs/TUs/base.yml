@@ -13,8 +13,9 @@ seed: 12344
 
 transformer_norm_input: true
 
-runs: 20
+runs: 10
 epochs: 100
+batch_size: 128
 
 d_model: 128
 dim_feedforward: 256
