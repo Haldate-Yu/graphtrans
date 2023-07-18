@@ -39,7 +39,8 @@ def seed_everything(seed):
 def results_to_file(args, test_acc, test_std,
                     val_acc, val_std,
                     total_time, total_time_std,
-                    avg_time, avg_time_std):
+                    avg_time, avg_time_std,
+                    test_time_avg, test_time_std):
     if not os.path.exists('./results/{}'.format(args.dataset)):
         print("=" * 20)
         print("Creating Results File !!!")
@@ -56,7 +57,8 @@ def results_to_file(args, test_acc, test_std,
                   "test_acc", "test_std",
                   "val_acc", "val_std",
                   "total_time", "total_time_std",
-                  "avg_time", "avg_time_std"]
+                  "epoch_time", "epoch_time_std",
+                  "test_time", "test_time_std"]
 
     with open(filename, "a+") as f:
 
@@ -69,13 +71,14 @@ def results_to_file(args, test_acc, test_std,
                                 fieldnames=headerList)
             dw.writeheader()
 
-        line = "{}, {}, {}, {}, {}, {}, {}, :::::::::, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}\n".format(
+        line = "{}, {}, {}, {}, {}, {}, {}, :::::::::, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}\n".format(
             args.model_type, args.nhead, args.batch_size,
             args.num_encoder_layers, args.model_dim,
             args.total_params, args.memory_usage,
             test_acc, test_std,
             val_acc, val_std,
             total_time, total_time_std,
-            avg_time, avg_time_std
+            avg_time, avg_time_std,
+            test_time_avg, test_std
         )
         f.write(line)

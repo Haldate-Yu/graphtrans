@@ -287,20 +287,23 @@ def main():
         logger.info("[Evaluate] Loaded from {}", os.path.join(args.save_path, str(run_id), "best_model.pt"))
         model.load_state_dict(state_dict["model"])
         best_valid_perf = eval(model, device, valid_loader, evaluator)
+        t_start_test = time.time()
         best_test_perf = eval(model, device, test_loader, evaluator)
+        test_time = time.time() - t_start_test
         total_time_taken = time.time() - t0
         avg_time_epoch = np.mean(per_epoch_time)
 
         return best_valid_perf[dataset.eval_metric], best_test_perf[
-            dataset.eval_metric], total_time_taken, avg_time_epoch
+            dataset.eval_metric], total_time_taken, avg_time_epoch, test_time
 
-    vals, tests, total_time_list, avg_time_list = [], [], [], []
+    vals, tests, total_time_list, avg_time_list, test_time_list = [], [], [], [], []
     for run_id in range(args.runs):
-        best_val, final_test, total_time, avg_time = run(run_id)
+        best_val, final_test, total_time, avg_time, test_time = run(run_id)
         vals.append(best_val)
         tests.append(final_test)
         total_time_list.append(total_time)
         avg_time_list.append(avg_time)
+        test_time_list.append(test_time)
 
         logger.info(f"Run {run_id} - val: {best_val}, test: {final_test}")
 
@@ -312,7 +315,8 @@ def main():
     utils.results_to_file(args, np.mean(tests), np.std(tests),
                           np.mean(vals), np.std(vals),
                           np.mean(total_time_list), np.std(total_time_list),
-                          np.mean(avg_time_list), np.std(avg_time_list))
+                          np.mean(avg_time_list), np.std(avg_time_list),
+                          np.mean(test_time_list), np.std(test_time_list))
 
 
 if __name__ == "__main__":
